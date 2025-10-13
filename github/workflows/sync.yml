@@ -1,31 +1,31 @@
-name: Sync From Repo A
+name: Sync from Source Repo
 
 on:
   schedule:
-    - cron: '*/1 * * * *'  # Runs every 5 minutes
-  workflow_dispatch:        # Manual trigger
+    - cron: '*/5 * * * *'  # Every 5 minutes
+  workflow_dispatch:        # Manual trigger if needed
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repo B (this repo)
+      - name: Checkout target repo (mun26)
         uses: actions/checkout@v3
 
-      - name: Clone Repo A (source repo)
+      - name: Clone source repo
         run: |
-          git clone https://${{ secrets.SOURCE_REPO_TOKEN }}@github.com/YOUR_USERNAME/repo-a.git source
+          git clone https://${{ secrets.SOURCE_REPO_TOKEN }}@github.com/iistmunwebsite/SOURCE_REPO_NAME.git source
 
-      - name: Copy contents from Repo A
+      - name: Copy files from source repo
         run: |
           cp -r source/* .
-          cp -r source/.* . || true  # Include hidden files, skip errors for .git
+          cp -r source/.* . || true
           rm -rf source
 
-      - name: Commit & push if there are changes
+      - name: Commit and push changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "iistmunwebsite"
+          git config user.email "iist.mun.website@gmail.com"
           git add .
-          git diff --quiet && echo "No changes to commit" || (git commit -m "Auto-sync from repo-a" && git push)
+          git diff --quiet && echo "No changes to commit" || (git commit -m "Auto-sync from source repo" && git push)
