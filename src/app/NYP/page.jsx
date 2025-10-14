@@ -1,0 +1,435 @@
+'use client'// src/app/countries/page.jsx
+import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { toast } from 'react-hot-toast';
+import Signintosee from '../components/Signintosee';
+import { FaUserCircle } from 'react-icons/fa';
+
+
+const NYP = () => {
+
+
+
+
+
+
+
+
+  const [country, setCName] = useState('');
+  const comtee = 'NYP'
+  const crtuu = async () => {
+
+    const isConfirmedd = window.confirm('Are you sure, you want to add?');
+    if (isConfirmedd) {
+      // Create a new user if one doesn't already exist
+      const res = await fetch("/api/country_add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          country, comtee,
+        }),
+      });
+      window.location.href = '/NYP';
+      toast.success('country added..!');
+
+      if (!res.ok) {
+        console.log("Error creating user");
+        return false;
+      }
+
+
+      return true; // Allow sign-in
+
+    }
+  }
+  const { status, data: session } = useSession();
+
+
+
+  const [id, setId] = useState('');
+  const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
+  const [conty, setconty] = useState('');
+  const [commi, setcommi] = useState('');
+  const [saatus, setSaat] = useState('');
+
+  const getUdata = async () => {
+
+    const res = await fetch("/api/clicked", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: session?.user?.email }),
+    });
+    const resjson = await res.json();
+    console.log(resjson);
+
+    setId(resjson?.id);
+    setEmail(resjson?.email);
+    setName(resjson?.name);
+    setRole(resjson?.role);
+    setSaat(resjson?.status);
+    setcommi(resjson?.comt);
+    setconty(resjson?.country)
+    if (resjson?.college === 'your college' || resjson?.mobile === '0000000000') {
+      window.location.href = '/profile'
+    }
+  };
+  useEffect(() => {
+    if (session?.user) {
+      getUdata();
+    }
+  }, [session?.user]);
+
+
+
+
+
+
+
+  const [Clist, setClist] = useState([]);
+  const getComitlist = async () => {
+
+    const load1287 = toast.loading('fetching info, please wait');
+    const ress = await fetch("/api/country_get", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ comtee: comtee }),
+    });
+    const ressjson = await ress.json();
+    console.log(ressjson);
+    setClist(ressjson);
+    if (Array.isArray(ressjson) && ressjson.length > 0) {
+      const sortedList = [...ressjson].sort((a, b) => a.country.localeCompare(b.country));
+      setClist(sortedList);
+    }
+
+    toast.dismiss(load1287);
+    toast.success('data fetched');
+  };
+  useEffect(() => {
+    if (session?.user) {
+      getComitlist();
+    }
+  }, [session?.user]);
+
+
+
+  const updateContry = async (cont, sat) => {
+    if (sat === 'none') {
+      const isConfirmed = window.confirm('lock this country?');
+      if (isConfirmed) {
+        const k = toast.loading("Updating info, please wait");
+        const postReqData = {
+          id: id,
+          country: cont,
+          comtee: comtee,
+          email: email,
+          name: name,
+          status: 'pending',
+        }
+        try {
+          const reso = await fetch("/api/country_update", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(postReqData),
+          });
+          const resjson = await reso.json();
+          if (reso.status === 200) {
+            toast.dismiss(k);
+          } else if (reso.status === 201) {
+            toast.dismiss(k);
+            toast.error("Could not update, please try again.");
+          } else {
+            toast.error("Something went wrong.");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+
+        const postaReqData = {
+          id: id,
+          country: cont,
+          comt: comtee,
+          status: 'pending',
+
+        }
+        try {
+          const resoo = await fetch("/api/update", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(postaReqData),
+          });
+          const resoojson = await resoo.json();
+          if (resoo.status === 200) {
+            toast.dismiss(k);
+            toast.success("Sent request");
+          } else if (resoo.status === 201) {
+            toast.dismiss(k);
+            toast.error("Could not update, please try again.");
+          } else {
+            toast.error("Something went wrong.")
+          }
+        } catch (error) {
+          console.error("Error:", error);
+        }
+        window.location.href = '/paymentNYP'
+      }
+      else { toast.error('no changes done'); }
+    }
+  }
+
+  return (
+
+    <div className="max-w-4xl mx-auto p-8">
+      {saatus === 'success' ? <div> <label htmlFor="name" className="block text-lg font-bold mb-2 text-center p-4 border-2 rounded-lg">SUCCESS <br /> <hr /> <br />Country : {conty}, Commitee: {commi}</label>
+        <div>
+          {status === 'authenticated' &&
+            <div>
+              <img
+                src={'NYP.jpg'}
+                alt={'NYP'}
+                className="w-[20vh] lg:w-[30vh] mx-auto h-[20vh] object-cover object-center rounded-[40px] lg:h-[30vh] m-4 mt-0 shadow-xl shadow-black"
+              />
+              <h1 className='text-center text-xl p-2 mx-auto border rounded-t-xl w-1/2 lg:w-1/4 bg-gray-100 border-b-0'>Executive Board</h1>
+              <div className='w-full lg:w-2/5 mx-auto border h-[20vh] rounded-xl flex justify-center bg-gray-300 backdrop-blur-4xl bg-opacity-50 items-center gap-5 shadow-xl shadow-black'>
+                <div className='border px-2 lg:px-5 py-2 rounded-xl bg-white bg-opacity-50'>
+                  <img src="nypchair.png" className='h-[10vh] rounded-xl ' alt="" />
+                  <h2 className='text-xs text-gray-400'>Chair</h2>
+                  <h1>GAUTHAM</h1>
+                </div>
+                <div className='border py-2 px-2 lg:px-5 rounded-xl bg-white bg-opacity-50'>
+                  <img src="nypvicechair.png" className='h-[10vh] rounded-xl' alt="" />
+                  <h2 className='text-xs text-gray-400'>Vice Chair</h2>
+                  <h1 className=''>ANAMIKA</h1>
+                </div>
+              </div>
+              <h1 className="text-sm lg:text-xl text-gray-200  text-center mb-2 mt-6">Agenda : Freedom of Speech in India: A
+
+                Fundamental Right or a Conditional Privilege? - Examining the fine print of Article 19(1)(a) of the Indian Constitution and its reasonable restrictions.</h1>
+
+              <h1 className="text-3xl font-bold text-center">Portfolio List</h1>
+              <h1 className="text-lg text-gray-500 font-bold text-center mb-2">for NYP</h1>
+              <div className='border border-gray-600 rounded-xl m-2 mx-5 p-2 lg:mx-64 bg-gray-500 backdrop-blur-4xl bg-opacity-50'>
+                <label htmlFor="name" className="block text-lg text-red-500 font-bold mb-2 text-center">Succesfully registerd : {Clist.filter(i => i.status === 'success').length}</label>
+                <label htmlFor="name" className="block text-lg text-green-500 font-bold mb-2 text-center">Available countries: {Clist.filter(i => i.status === 'none').length}</label>
+                <label htmlFor="name" className="block text-lg text-yellow-500 font-bold mb-2 text-center">Pending countries: {Clist.filter(i => i.status === 'pending').length}</label>
+                <label htmlFor="name" className="block text-lg text-gray-400 font-bold mb-2 text-center">Total countries : {Clist.length}</label>
+              </div>
+              {role === 'admin' ? (
+                <div className='p-10'>
+                  <div className="mb-4">
+                    <label htmlFor="name" className="block text-lg font-bold mb-2">Add a country : </label>
+                    <label htmlFor="name" className="block text-sm text-gray-500 font-bold mb-2">want to delete?, dm super-admin</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      onChange={(e) => setCName(e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+                  <Link className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700" onClick={crtuu} href='/NYP' > Submit </Link>
+                </div>) : (
+
+                <label htmlFor="name" className="block text-lg font-bold mb-5 text-center p-4 border-2 rounded-lg">Only Admin can add a Portfolio</label>
+              )}
+            </div>}
+
+          <label htmlFor="name" className="block text-xl text-gray-400 font-bold mb-2">Click on the adjacent button, to select a portfolio</label>
+          <Signintosee />
+
+          <div className="grid gap-6 lg:grid-cols-2 md:grid-cols-1">
+            {Clist.map((Clister, index) => (
+              <div key={index} className="flex items-center justify-between bg-gray-200 rounded-lg shadow p-4 border">
+                <span className='flex'>
+                  <FaUserCircle className=" h-[30px] w-[30px] mx-auto my-auto mr-3 ml-0 pl-0  text-gray-600 " />
+
+                  <span className="text-lg my-auto ">{Clister.country}</span>
+                </span>
+                <Link
+                  className={`px-4 py-2 font-bold  cursor-not-allowed pointer-events-none  text-white rounded ${Clister.status === "none" ? "bg-gray-500" : Clister.status === "pending" ? "bg-yellow-600" : "bg-red-500"}`}
+                  onClick={() => updateContry(Clister.country, Clister.status)}
+                  href=""
+                >
+                  {Clister.name}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div></div> :
+        saatus === 'pending' ? <div className='flex flex-col items-center justify-center'><label htmlFor="name" className="block text-lg font-bold mb-2 text-center p-4 border-2 rounded-lg">PENDING <br /> <hr /> <br />Country : {conty}, Commitee: {commi}</label>
+          <h1>Payment under verification..! If you haven't paid yet, </h1>
+          <Link
+            href={'/paymentNYP'}
+            className="border mb-10 rounded-lg px-10 py-5 text-center bg-yellow-600 text-white text-2xl font-bold p-10"
+          >Pay now</Link>
+
+          <div>
+            {status === 'authenticated' &&
+              <div>
+                <img
+                  src={'NYP.jpg'}
+                  alt={'NYP'}
+                  className="w-[20vh] lg:w-[30vh] mx-auto h-[20vh] object-cover object-center rounded-[40px] lg:h-[30vh] m-4 mt-0 shadow-xl shadow-black"
+                />
+                <h1 className='text-center text-xl p-2 mx-auto border rounded-t-xl w-1/2 lg:w-1/4 bg-gray-100 border-b-0'>Executive Board</h1>
+                <div className='w-full lg:w-2/5 mx-auto border h-[20vh] rounded-xl flex justify-center bg-gray-300 backdrop-blur-4xl bg-opacity-50 items-center gap-5 shadow-xl shadow-black'>
+                  <div className='border px-2 lg:px-5 py-2 rounded-xl bg-white bg-opacity-50'>
+                    <img src="nypchair.png" className='h-[10vh] rounded-xl ' alt="" />
+                    <h2 className='text-xs text-gray-400'>Chair</h2>
+                    <h1>GAUTHAM</h1>
+                  </div>
+                  <div className='border py-2 px-2 lg:px-5 rounded-xl bg-white bg-opacity-50'>
+                    <img src="nypvicechair.png" className='h-[10vh] rounded-xl' alt="" />
+                    <h2 className='text-xs text-gray-400'>Vice Chair</h2>
+                    <h1 className=''>ANAMIKA</h1>
+                  </div>
+                </div>
+                <h1 className="text-sm lg:text-xl text-gray-200  text-center mb-2 mt-6">Agenda : Freedom of Speech in India: A
+
+                  Fundamental Right or a Conditional Privilege? - Examining the fine print of Article 19(1)(a) of the Indian Constitution and its reasonable restrictions.</h1>
+
+                <h1 className="text-3xl font-bold text-center">Portfolio List</h1>
+                <h1 className="text-lg text-gray-500 font-bold text-center mb-2">for NYP</h1>
+                <div className='border border-gray-600 rounded-xl m-2 mx-5 p-2 lg:mx-64 bg-gray-500 backdrop-blur-4xl bg-opacity-50'>
+                  <label htmlFor="name" className="block text-lg text-red-500 font-bold mb-2 text-center">Succesfully registerd : {Clist.filter(i => i.status === 'success').length}</label>
+                  <label htmlFor="name" className="block text-lg text-green-500 font-bold mb-2 text-center">Available countries: {Clist.filter(i => i.status === 'none').length}</label>
+                  <label htmlFor="name" className="block text-lg text-yellow-500 font-bold mb-2 text-center">Pending countries: {Clist.filter(i => i.status === 'pending').length}</label>
+                  <label htmlFor="name" className="block text-lg text-gray-400 font-bold mb-2 text-center">Total countries : {Clist.length}</label>
+                </div>
+                {role === 'admin' ? (
+                  <div className='p-10'>
+                    <div className="mb-4">
+                      <label htmlFor="name" className="block text-lg font-bold mb-2">Add a country : </label>
+                      <label htmlFor="name" className="block text-sm text-gray-500 font-bold mb-2">want to delete?, dm super-admin</label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        onChange={(e) => setCName(e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <Link className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700" onClick={crtuu} href='/NYP' > Submit </Link>
+                  </div>) : (
+
+                  <label htmlFor="name" className="block text-lg font-bold mb-5 text-center p-4 border-2 rounded-lg">Only Admin can add a Portfolio</label>
+                )}
+              </div>}
+
+            <label htmlFor="name" className="block text-xl text-gray-400 font-bold mb-2">Click on the adjacent button, to select a portfolio</label>
+            <Signintosee />
+
+            <div className="grid gap-6 lg:grid-cols-2 md:grid-cols-1">
+              {Clist.map((Clister, index) => (
+                <div key={index} className="flex items-center justify-between bg-gray-200 rounded-lg shadow p-4 border">
+                  <span className='flex'>
+                    <FaUserCircle className=" h-[30px] w-[30px] mx-auto my-auto mr-3 ml-0 pl-0  text-gray-600 " />
+
+                    <span className="text-lg my-auto ">{Clister.country}</span>
+                  </span>
+                  <Link
+                    className={`px-4 py-2 font-bold text-white  cursor-not-allowed pointer-events-none  rounded ${Clister.status === "none" ? "bg-gray-500" : Clister.status === "pending" ? "bg-yellow-600" : "bg-red-500"}`}
+                    onClick={() => updateContry(Clister.country, Clister.status)}
+                    href=""
+                  >
+                    {Clister.name}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div> : (
+          <div>
+            {status === 'authenticated' &&
+              <div>
+                <img
+                  src={'NYP.jpg'}
+                  alt={'NYP'}
+                  className="w-[20vh] lg:w-[30vh] mx-auto h-[20vh] object-cover object-center rounded-[40px] lg:h-[30vh] m-4 mt-0 shadow-xl shadow-black"
+                />
+                <h1 className='text-center text-xl p-2 mx-auto border rounded-t-xl w-1/2 lg:w-1/4 bg-gray-100 border-b-0'>Executive Board</h1>
+                <div className='w-full lg:w-2/5 mx-auto border h-[20vh] rounded-xl flex justify-center bg-gray-300 backdrop-blur-4xl bg-opacity-50 items-center gap-5 shadow-xl shadow-black'>
+                  <div className='border px-2 lg:px-5 py-2 rounded-xl bg-white bg-opacity-50'>
+                    <img src="nypchair.png" className='h-[10vh] rounded-xl ' alt="" />
+                    <h2 className='text-xs text-gray-400'>Chair</h2>
+                    <h1>GAUTHAM</h1>
+                  </div>
+                  <div className='border py-2 px-2 lg:px-5 rounded-xl bg-white bg-opacity-50'>
+                    <img src="nypvicechair.png" className='h-[10vh] rounded-xl' alt="" />
+                    <h2 className='text-xs text-gray-400'>Vice Chair</h2>
+                    <h1 className=''>ANAMIKA</h1>
+                  </div>
+                </div>
+                <h1 className="text-sm lg:text-xl text-gray-200  text-center mb-2 mt-6">Agenda : Freedom of Speech in India: A
+
+                  Fundamental Right or a Conditional Privilege? - Examining the fine print of Article 19(1)(a) of the Indian Constitution and its reasonable restrictions.</h1>
+
+                <h1 className="text-3xl font-bold text-center">Portfolio List</h1>
+                <h1 className="text-lg text-gray-500 font-bold text-center mb-2">for NYP</h1>
+                <div className='border border-gray-600 rounded-xl m-2 mx-5 p-2 lg:mx-64 bg-gray-500 backdrop-blur-4xl bg-opacity-50'>
+                  <label htmlFor="name" className="block text-lg text-red-500 font-bold mb-2 text-center">Succesfully registerd : {Clist.filter(i => i.status === 'success').length}</label>
+                  <label htmlFor="name" className="block text-lg text-green-500 font-bold mb-2 text-center">Available countries: {Clist.filter(i => i.status === 'none').length}</label>
+                  <label htmlFor="name" className="block text-lg text-yellow-500 font-bold mb-2 text-center">Pending countries: {Clist.filter(i => i.status === 'pending').length}</label>
+                  <label htmlFor="name" className="block text-lg text-gray-400 font-bold mb-2 text-center">Total countries : {Clist.length}</label>
+                </div>
+                {role === 'admin' ? (
+                  <div className='p-10'>
+                    <div className="mb-4">
+                      <label htmlFor="name" className="block text-lg font-bold mb-2">Add a country : </label>
+                      <label htmlFor="name" className="block text-sm text-gray-500 font-bold mb-2">want to delete?, dm super-admin</label>
+                      <input
+                        type="text"
+                        id="name"
+                        name="name"
+                        onChange={(e) => setCName(e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                    <Link className="w-full p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700" onClick={crtuu} href='/NYP' > Submit </Link>
+                  </div>) : (
+
+                  <label htmlFor="name" className="block text-lg font-bold mb-5 text-center p-4 border-2 rounded-lg">Only Admin can add a Portfolio</label>
+                )}
+              </div>}
+
+            <label htmlFor="name" className="block text-xl text-gray-400 font-bold mb-2">Click on the adjacent button, to select a portfolio</label>
+            <Signintosee />
+
+            <div className="grid gap-6 lg:grid-cols-2 md:grid-cols-1">
+              {Clist.map((Clister, index) => (
+                <div key={index} className="flex items-center justify-between bg-gray-200 rounded-lg shadow p-4 border">
+                  <span className='flex'>
+                    <FaUserCircle className=" h-[30px] w-[30px] mx-auto my-auto mr-3 ml-0 pl-0  text-gray-600 " />
+
+                    <span className="text-lg my-auto ">{Clister.country}</span>
+                  </span>
+                  <Link
+                    className={`px-4 py-2 font-bold text-white rounded ${Clister.status === "none" ? "bg-green-500" : Clister.status === "pending" ? "bg-yellow-600" : "bg-red-500"}`}
+                    onClick={() => updateContry(Clister.country, Clister.status)}
+                    href=""
+                  >
+                    {Clister.name}
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+    </div>
+  );
+};
+
+export default NYP;
