@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #e0f7d4;
+  --foreground: #171717;
+}
+
+@font-face {
+  font-family: "Averta";
+  src: url("/fonts/AvertaStandard.ttf") format("truetype");
+  font-style: normal;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family:'Averta', Arial, Helvetica, sans-serif;
+}
+
+/* Custom scrollbar styling */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-cute::-webkit-scrollbar {
+  width: 12px;
+}
+
+.scrollbar-cute::-webkit-scrollbar-track {
+  background: #ffffff;
+  border-radius: 10px;
+  border: 3px solid #00000098;
+}
+
+.scrollbar-cute::-webkit-scrollbar-thumb {
+  background-color: #023059;
+  border-radius: 10px;
+  border: 3px solid #00000098;
+}
+
+.scrollbar-cute::-webkit-scrollbar-thumb:hover {
+  background-color: #00699600;
+}
+
+.bbtn {
+  color: #e1e1e1;
+  font-family: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  position: relative;
+  border: none;
+  background: none;
+  transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition-duration: 400ms;
+  transition-property: color;
+  }
+
+  .bbtn:focus,
+  .bbtn:hover {
+      color: #fff;
+  }
+
+  .bbtn:focus:after,
+  .bbtn:hover:after {
+      width: 100%;
+      left: 0%;
+  }
+
+  .bbtn:after {
+      content: "";
+      pointer-events: none;
+      bottom: -2px;
+      left: 50%;
+      position: absolute;
+      width: 0%;
+      height: 2px;
+      background-color: #fff;
+      transition-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+      transition-duration: 400ms;
+      transition-property: width, left;
+  }
+
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  .scrolling-text {
+    animation: scroll-left 15s linear infinite;
+    white-space: nowrap; /* Prevent text from wrapping */
+  }
